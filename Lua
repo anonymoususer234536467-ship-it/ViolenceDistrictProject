@@ -1,0 +1,34 @@
+local UserInputService = game:GetService("UserInputService")
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
+
+local Animator = workspace.Ndjdjtjrnhd.Humanoid.Animator
+
+--// Ambience
+--game.ReplicatedStorage.Remotes:WaitForChild("SoundPlayer"):FireServer("129170057284917", workspace.Ndjdjtjrnhd.HumanoidRootPart, 0.5, 50)
+
+--// NO M1 COOLDOWN
+local M1Event = ReplicatedStorage.Remotes.Attacks.BasicAttack
+local LungeEvent = ReplicatedStorage.Remotes.Attacks.Lunge
+local M1Stuff = true
+
+Player = "LocalPlayer"
+AnimationId = "133963973694098"
+
+local Anim = Instance.new("Animation")
+Anim.AnimationId = "rbxassetid://"..AnimationId
+
+local Animation = game.Players[Player].Character.Humanoid:LoadAnimation(Anim)
+print("Successfully configured Animation")
+
+UserInputService.InputBegan:Connect(function(input, gameProcessedEvent)
+	if gameProcessedEvent then return end -- ignore if typing in a textbox, etc.
+
+	if input.KeyCode == Enum.KeyCode.R then
+		
+		for i = 1, 5 do
+			M1Event:FireServer()
+			Animation:Play() --Play the animation cause it WONT ITSELF
+			task.wait(0)
+		end
+	end
+end)
