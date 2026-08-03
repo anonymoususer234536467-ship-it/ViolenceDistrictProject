@@ -1,36 +1,171 @@
-local UserInputService = game:GetService("UserInputService")
+
+--[[
+
+Create UI Function
+
+]]
+
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local Players = game:GetService("Players")
+local LocalPlr = Players.LocalPlayer
 
-local Animator = workspace.Ndjdjtjrnhd.Humanoid.Animator
+--// Create UI
+local ScreenUI = Instance.new("ScreenGui")
+ScreenUI.Parent = LocalPlr:WaitForChild("PlayerGui")
+ScreenUI.Name = "Spectatot-VR"
+print("created screenui")
 
---// Ambience
---game.ReplicatedStorage.Remotes:WaitForChild("SoundPlayer"):FireServer("129170057284917", workspace.Ndjdjtjrnhd.HumanoidRootPart, 0.5, 50)
+--// Create frame
+local FrameUI = Instance.new("Frame")
+FrameUI.Parent = ScreenUI
+FrameUI.Name = "BottomBar"
 
---// NO M1 COOLDOWN
-local M1Event = ReplicatedStorage.Remotes.Attacks.BasicAttack
-local LungeEvent = ReplicatedStorage.Remotes.Attacks.Lunge
-local M1Stuff = true
+FrameUI.BackgroundTransparency = 1
+FrameUI.Position = UDim2.new(0.013, 0, 0.884, 0)
+FrameUI.Size = UDim2.new(0.296, 0, 0.102, 0)
 
-Player = "LocalPlayer"
-AnimationId = "133963973694098"
+--// Create UIRatio
+local UIAspectRatio = Instance.new("UIAspectRatioConstraint")
+UIAspectRatio.Parent = FrameUI
 
-local Anim = Instance.new("Animation")
-Anim.AnimationId = "rbxassetid://"..AnimationId
+UIAspectRatio.AspectType = "ScaleWithParentSize"
+UIAspectRatio.DominantAxis = "Width"
+UIAspectRatio.AspectRatio = 4.345
 
-local Animation = game.Players[Player].Character.Humanoid:LoadAnimation(Anim)
-print("Successfully configured Animation")
+--// Create ImgButton
+local ImgButton = Instance.new("ImageButton")
+ImgButton.Parent = FrameUI
+ImgButton.Name = "CommandPanel"
 
-UserInputService.InputBegan:Connect(function(input, gameProcessedEvent)
-	if gameProcessedEvent then return end -- ignore if typing in a textbox, etc.
+ImgButton.BackgroundTransparency = 1
+ImgButton.Position = UDim2.new(0.008, 0, 0.119, 0)
+ImgButton.Size = UDim2.new(0.175, 0, 0.762, 0)
+ImgButton.Image = "rbxassetid://105650118875182"
 
-	if input.KeyCode == Enum.KeyCode.R then
-		
-		for i = 1, 5 do
-			M1Event:FireServer()
-			Animation:Play() --Play the animation cause it WONT ITSELF
-			task.wait(0)
-		end
-	end
+ImgButton.MouseEnter:Connect(function()
+	ImgButton.Image = "rbxassetid://75547426885570";
+end);
+ImgButton.MouseLeave:Connect(function()
+	ImgButton.Image = "rbxassetid://105650118875182";
+end);
+
+--================================================================--
+
+--// Create main commands UI
+local SettingsUI = ReplicatedStorage.Spectator.Spectatot.Settings:Clone()
+SettingsUI.ScrollingFrame:ClearAllChildren()
+SettingsUI.TextLabel.Text = "Commands"
+SettingsUI.Parent = ScreenUI
+
+local UIListLayout = Instance.new("UIListLayout")
+UIListLayout.Parent = SettingsUI.ScrollingFrame
+UIListLayout.Padding = UDim.new(0, -1.00)
+
+ImgButton.Activated:Connect(function()
+	SettingsUI.Visible = not SettingsUI.Visible
 end)
 
-print("Loaded")
+local Table = {
+	"colorpreview";
+	"Colorpick";
+}
+
+--// Destroys UI we don't need (make it keep the ui we need in the future)
+for _, inTable in pairs(Table) do
+	local txt = SettingsUI:FindFirstChild(inTable)
+	
+	if txt then
+		txt:Destroy()
+	end
+end
+
+--================================================================--
+
+local Table1 = {
+	"ImageLabel";
+	"Gameplay";
+}
+
+--// Create tab FUNC
+local function CreateTab(txt)
+	local newTab = ReplicatedStorage.Spectator.Spectatot.Settings.ScrollingFrame.Gameplay:Clone()
+	newTab.Parent = SettingsUI.ScrollingFrame
+	newTab.Name = txt
+
+	local Text = newTab.Gameplay
+	Text.Text = txt
+
+	for _, child in pairs(newTab:GetChildren()) do
+		if not table.find(Table1, child.Name) then
+			child:Destroy()
+		end
+	end
+
+	local buttonHolder = Instance.new("Frame")
+	buttonHolder.Name = "ButtonHolder"
+	buttonHolder.BackgroundTransparency = 1
+	buttonHolder.Size = UDim2.new(0.7, 0, 0, 200)
+	buttonHolder.Position = UDim2.new(0, 0, 0.2, 0)
+	buttonHolder.Parent = newTab
+
+	local layout = Instance.new("UIListLayout")
+	layout.Parent = buttonHolder
+	layout.HorizontalAlignment = "Right"
+	layout.SortOrder = Enum.SortOrder.LayoutOrder
+	layout.Padding = UDim.new(0, 30)
+
+	return newTab
+end
+
+--// Create button FUNC
+local function CreateButton(txt, desc, Tab)
+	local newButton = ReplicatedStorage.Spectator.Spectatot.Settings.ScrollingFrame.Gameplay.chance:Clone()
+	newButton.Name = txt
+	newButton.Size = UDim2.new(0, 575, 0, 60)
+	newButton.Text = txt
+	newButton["Epilepsy mode"].Text = desc
+	newButton.Parent = Tab.ButtonHolder
+
+	local padding = Instance.new("UIPadding")
+	padding.PaddingLeft = UDim.new(0, 25)
+	padding.Parent = newButton
+
+	local script = newButton.ImageButton:FindFirstChildWhichIsA("LocalScript")
+	if script then
+		script:Destroy()
+	end
+
+	return newButton
+end
+
+--// create le contents
+local KillerTab = CreateTab("Killers")
+local SurvivorsTab = CreateTab("Survivors")
+local GameplayTab = CreateTab("Gameplay")
+
+local KillerButton1 = CreateButton("Disable Attack Cooldown", "Allows you to spam basic attacks.", KillerTab)
+local KillerButton2 = CreateButton("Disable Ability Cooldown", "Allows you to spam your abilities.", KillerTab)
+
+--local KillerButton3 = CreateButton("Block all Windows", "Blocks all windows in the match.", KillerTab)
+--local KillerButton4 = CreateButton("Destroy all Pallets", "Destroys all the pallets in the match.", KillerTab)
+
+--
+
+local GameplayButton1 = CreateButton("Free cursor", "Lets you move around your mouse when in first person.", GameplayTab)
+local GameplayButton2 = CreateButton("nil", "nil.", GameplayTab)
+
+--local GameplayButton3 = CreateButton("nil", "nil.", GameplayTab)
+--local GameplayButton4 = CreateButton("nil", "nil.", GameplayTab)
+
+--
+local SurvivorButton1 = CreateButton("nil", "nil.", SurvivorsTab)
+local SurvivorButton2 = CreateButton("nil", "nil.", SurvivorsTab)
+
+--================================================================--
+
+--[[
+to do: make an x toggle thing once u click an command.
+require the actual functionality
+
+
+]]
